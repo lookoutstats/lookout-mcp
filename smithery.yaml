@@ -1,0 +1,14 @@
+# Smithery (https://smithery.ai): runs the stdio server with the user's Lookout API key.
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required: [lookoutApiKey]
+    properties:
+      lookoutApiKey:
+        type: string
+        description: A Lookout API key (lk_live_…) from Settings › API & MCP at lookoutstats.com. Read-only unless created with "Allow notes and exports".
+  commandFunction: |-
+    (config) => ({ command: "npx", args: ["-y", "lookout-mcp"], env: { LOOKOUT_API_KEY: config.lookoutApiKey } })
+  exampleConfig:
+    lookoutApiKey: lk_live_xxxxxxxxxxxxxxxxxxxxxxxx

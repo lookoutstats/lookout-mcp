@@ -1,0 +1,84 @@
+{
+  "name": "lookout-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Lookout: ask Claude, Cursor or any MCP client about Vercel Web Analytics across all your projects.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vercel",
+    "vercel-analytics",
+    "web-analytics",
+    "speed-insights",
+    "claude",
+    "cursor",
+    "lookout"
+  ],
+  "homepage": "https://github.com/lookoutstats/lookout-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/lookoutstats/lookout-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lookoutstats/lookout-mcp.git"
+  },
+  "license": "MIT",
+  "author": "Lookout <hello@lookoutstats.com> (https://lookoutstats.com)",
+  "type": "module",
+  "mcpName": "io.github.lookoutstats/lookout-mcp",
+  "bin": {
+    "lookout-mcp": "dist/stdio.js",
+    "lookout-mcp-http": "dist/http.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./http": {
+      "types": "./dist/http.d.ts",
+      "import": "./dist/http.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "gen:types": "openapi-typescript https://api.lookoutstats.com/v1/openapi.json -o src/generated/openapi.ts",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "prepublishOnly": "npm run check",
+    "start:http": "node dist/http.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@types/node": "22.19.1",
+    "eslint": "9.39.1",
+    "globals": "14.0.0",
+    "openapi-typescript": "7.13.0",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

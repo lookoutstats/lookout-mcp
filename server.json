@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.lookoutstats/lookout-mcp",
+  "title": "Lookout",
+  "description": "Ask about Vercel Web Analytics and Speed Insights across all your projects and boards.",
+  "websiteUrl": "https://lookoutstats.com",
+  "repository": { "url": "https://github.com/lookoutstats/lookout-mcp", "source": "github" },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "lookout-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "LOOKOUT_API_KEY",
+          "description": "A Lookout API key (lk_live_…) from Settings › API & MCP",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.lookoutstats.com",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer followed by a Lookout API key (lk_live_…) from Settings › API & MCP",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
