@@ -12,9 +12,11 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Required reviewers on this environment (Settings › Environments) gate every release.
+    environment: npm
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -23,6 +25,7 @@ jobs:
       - name: Tag matches package.json
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: npm run check
-      - run: npm publish --provenance --access public
+      # Scripts don't run here (check already did): no dev dependency runs with the publish token in its environment.
+      - run: npm publish --provenance --access public --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

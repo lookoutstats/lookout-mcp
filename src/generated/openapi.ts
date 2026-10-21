@@ -76,7 +76,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
-                    /** @description A board id, from GET /v1/boards */
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
                     id: string;
                 };
                 cookie?: never;
@@ -164,7 +164,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
-                    /** @description A board id, from GET /v1/boards */
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
                     id: string;
                 };
                 cookie?: never;
@@ -471,6 +471,139 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/sites/{id}/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    range?: ("24h" | "7d" | "30d") | string;
+                    /** @description A board the site is on (id or name): adds its notes dated in the range */
+                    board?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description A site's Vercel project id, from GET /v1/boards/{id}/sites */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description One site in depth in one request: series, top referrers, countries and pages, production deployments, Core Web Vitals and, with a board, its notes */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            site: {
+                                id: string;
+                                name: string;
+                                domain: string;
+                            };
+                            range: string;
+                            goal: string | null;
+                            /** @enum {string} */
+                            granularity: "hour" | "day";
+                            visitors: number;
+                            previousVisitors: number | null;
+                            change: number | null;
+                            pageviews: number;
+                            points: {
+                                /** Format: date-time */
+                                start: string;
+                                visitors: number;
+                                previousVisitors: number | null;
+                            }[];
+                            referrers: {
+                                name: string;
+                                visitors: number;
+                                share: number;
+                            }[];
+                            countries: {
+                                name: string;
+                                visitors: number;
+                                share: number;
+                            }[];
+                            pages: {
+                                name: string;
+                                visitors: number;
+                                share: number;
+                            }[];
+                            deployments: {
+                                /** Format: date-time */
+                                at: string;
+                                message: string | null;
+                                branch: string | null;
+                                state: string;
+                            }[] | null;
+                            speed: {
+                                lcpMs: number | null;
+                                inpMs: number | null;
+                                cls: number | null;
+                                samples: number;
+                                /** @enum {string} */
+                                status: "passing" | "needs_work" | "poor" | "off";
+                                mobile: {
+                                    lcpMs: number | null;
+                                    inpMs: number | null;
+                                    cls: number | null;
+                                    samples: number;
+                                } | null;
+                                desktop: {
+                                    lcpMs: number | null;
+                                    inpMs: number | null;
+                                    cls: number | null;
+                                    samples: number;
+                                } | null;
+                            };
+                            notes?: {
+                                /** Format: uuid */
+                                id: string;
+                                siteId: string | null;
+                                /** Format: date */
+                                date: string;
+                                text: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such site (or board) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}/breakdowns": {
         parameters: {
             query?: never;
@@ -721,10 +854,12 @@ export interface paths {
                 query?: {
                     /** @description Only this site's notes (and the board-wide ones) */
                     site?: string;
+                    /** @description Only the notes dated in this range */
+                    range?: ("24h" | "7d" | "30d") | string;
                 };
                 header?: never;
                 path: {
-                    /** @description A board id, from GET /v1/boards */
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
                     id: string;
                 };
                 cookie?: never;
@@ -785,7 +920,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description A board id, from GET /v1/boards */
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
                     id: string;
                 };
                 cookie?: never;
@@ -878,7 +1013,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description A board id, from GET /v1/boards */
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
                     id: string;
                 };
                 cookie?: never;

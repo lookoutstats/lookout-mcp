@@ -5,23 +5,28 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-141412)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP%20%2B%20stdio-141412)](https://modelcontextprotocol.io)
 
-The MCP server for **[Lookout](https://lookoutstats.com)**: Vercel Web Analytics for all your projects, in one view. Ask Claude, Cursor or any MCP client about your sites — visitors, sources, campaigns, Core Web Vitals and traffic between your sites — and get answers from your real numbers.
+This is the MCP server for **[Lookout](https://lookoutstats.com)**. Lookout shows Vercel Web Analytics for all your projects in one view.
+
+Connect Claude, Cursor or a different MCP client. Then ask about your sites: visitors, sources, campaigns, Core Web Vitals and traffic between your sites. The answers come from your real numbers.
 
 > "Which landing page dropped most this week, and what deployed right before?"
 
-It's a thin client of Lookout's public REST API: every answer comes from `api.lookoutstats.com`, and the server stores nothing. Run it two ways:
+The server is a thin client of the Lookout REST API. Every answer comes from `api.lookoutstats.com`. The server stores no data.
+
+You can run the server in two ways:
 
 - **Hosted**, over Streamable HTTP: `https://mcp.lookoutstats.com`
-- **Locally**, over stdio: `npx lookout-mcp`
+- **Local**, over stdio: `npx lookout-mcp`
 
 ## 60-second setup
 
-1. In Lookout, open **Settings › API & MCP** and create an API key (`lk_live_…`). Tick **Allow notes and exports** only if you want the two write tools.
-2. Add the server to your client below, paste the key, and restart the client.
+1. In Lookout, open **Settings › API & MCP** and create an API key (`lk_live_…`). Select **Allow notes and exports** only if you want the two write tools.
+2. Add the server to your client with one of the configurations below. Paste the key into the configuration.
+3. Restart the client.
 
 ### Claude Desktop
 
-Settings → Developer → Edit config (`claude_desktop_config.json`):
+Open Settings → Developer → Edit config (`claude_desktop_config.json`), and add this entry:
 
 ```json
 {
@@ -37,11 +42,11 @@ Settings → Developer → Edit config (`claude_desktop_config.json`):
 
 ### claude.ai (connectors)
 
-claude.ai custom connectors connect without a key header, so the hosted server can't take your API key from there yet. Until Lookout supports OAuth sign-in for connectors, use Claude Desktop (above) or Claude Code.
+A claude.ai custom connector does not send a key header. Thus the hosted server cannot get your API key from a connector yet. Use Claude Desktop (above) or Claude Code until Lookout supports OAuth sign-in for connectors.
 
 ### Cursor
 
-`.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` for every project):
+Put this in `.cursor/mcp.json` in your project. To use the server in all your projects, put it in `~/.cursor/mcp.json`.
 
 ```json
 {
@@ -63,7 +68,7 @@ claude mcp add --transport http lookout https://mcp.lookoutstats.com \
 
 ### Windsurf
 
-`~/.codeium/windsurf/mcp_config.json`:
+Put this in `~/.codeium/windsurf/mcp_config.json`:
 
 ```json
 {
@@ -76,33 +81,45 @@ claude mcp add --transport http lookout https://mcp.lookoutstats.com \
 }
 ```
 
-### Any other client
+### Other clients
 
-stdio: `LOOKOUT_API_KEY=lk_live_… npx -y lookout-mcp` · Streamable HTTP: `POST https://mcp.lookoutstats.com` with `Authorization: Bearer lk_live_…`.
+- stdio: `LOOKOUT_API_KEY=lk_live_… npx -y lookout-mcp`
+- Streamable HTTP: `POST https://mcp.lookoutstats.com` with the header `Authorization: Bearer lk_live_…`
 
 ## Tools
 
-`range` is `24h`, `7d` (default) or `30d`, or a custom window `{ "from": "2026-10-01", "to": "2026-10-14" }` of up to 30 UTC days. A board can be named by its id or its exact name. Every tool answers with a one-line summary, then compact JSON.
+These rules apply to all tools:
 
-| Tool | Arguments | What it returns |
+- `range` is `24h`, `7d` (the default) or `30d`. It can also be a custom window, for example `{ "from": "2026-10-01", "to": "2026-10-14" }`. A custom window is 30 UTC days or less.
+- `board` is the board's id or its exact name.
+- Each tool returns a one-line summary first. Compact JSON follows the summary.
+
+| Tool | Arguments | Result |
 |---|---|---|
-| `list_boards` | — | The workspace's boards with ids and site counts |
-| `get_board` | `board`, `range` | Every site on a board: visitors and change vs the previous period, page views, pages per visit, top source and country, conversions |
-| `get_site` | `site`, `range`, `board?` | One site in depth: visitors per day (or hour), top referrers, countries and pages, production deployments, Core Web Vitals, and the board's notes |
-| `compare_sites` | `sites[]` (1–5), `range`, `mode`, `baseline?` | Sites side by side: `absolute`, `indexed` (first bucket = 100) or `baseline` (% of one site) |
-| `get_campaigns` | `site`, `range` | Visitors by UTM campaign, source and medium, with goal conversions (needs Vercel Web Analytics Plus) |
-| `get_flow` | `board`, `range` | Traffic between a board's sites: who sends visitors where |
+| `list_boards` | — | The boards in the workspace, with their ids and site counts |
+| `get_board` | `board`, `range` | All sites on a board. For each site: visitors, change against the previous period, page views, pages per visit, top source and country, conversions |
+| `get_site` | `site`, `range`, `board?` | One site in detail. It shows visitors per day (or per hour), top referrers, countries and pages, production deployments and Core Web Vitals. With `board`, it also shows the notes. |
+| `compare_sites` | `sites[]` (1–5), `range`, `mode`, `baseline?` | Sites side by side. `absolute` shows visitors. `indexed` sets the first bucket to 100. `baseline` shows each site as a percentage of one site. |
+| `get_campaigns` | `site`, `range` | Visitors by UTM campaign, source and medium, with goal conversions. This needs Vercel Web Analytics Plus. |
+| `get_flow` | `board`, `range` | Traffic between the sites on a board: which site sends visitors to which site |
 | `get_speed` | `site`, `range`, `device` | Core Web Vitals (LCP, INP, CLS, p75) for all, mobile or desktop visitors, and the slowest routes |
-| `list_alerts` | — | Alert rules and what fired in the last 30 days |
-| `add_annotation` ✎ | `board`, `site?`, `date`, `text`, `scope` | Pins a note to a day on the board's charts, for one site or all |
-| `export_board` ✎ | `board`, `fmt` (`pdf`/`csv`), `range` | A download link for the board, valid for 5 minutes |
+| `list_alerts` | — | The alert rules, and the alerts of the last 30 days |
+| `add_annotation` ✎ | `board`, `site?`, `date`, `text`, `scope` | Adds a note to a day on the board's charts, for one site or for all sites |
+| `export_board` ✎ | `board`, `fmt` (`pdf` or `csv`), `range` | A download link for the board. The link is valid for 5 minutes. |
 
-✎ Write tools: they need a key created with **Allow notes and exports**.
+✎ A write tool. A write tool needs a key with **Allow notes and exports**.
 
-**Resources:** `lookout://boards` (the boards) and `lookout://boards/{id}` (a board's sites, last 7 days).
-**Prompts:** `weekly_brief(board)` — a short brief with the biggest movers and why · `why_did_it_drop(site)` — when a drop started, what changed, and the likely cause.
+**Resources:**
 
-## Try asking
+- `lookout://boards`: the boards.
+- `lookout://boards/{id}`: the sites on a board, for the last 7 days.
+
+**Prompts:**
+
+- `weekly_brief(board)`: a short brief. It names the sites with the largest changes and the causes.
+- `why_did_it_drop(site)`: finds when a drop started, what changed, and the likely cause.
+
+## Example questions
 
 1. "Which landing page dropped most this week, and what deployed right before?"
 2. "Compare the three pricing pages over the last 30 days, indexed."
@@ -112,33 +129,36 @@ stdio: `LOOKOUT_API_KEY=lk_live_… npx -y lookout-mcp` · Streamable HTTP: `POS
 
 ## Security
 
-- **Your key, your data only.** Every call goes to Lookout's API with your key; a key sees only its own workspace. The server keeps no data, no logs of answers, and never stores the key.
-- **Read-only by default.** A key can only read unless you create it with *Allow notes and exports*; even then it can only add chart notes and make export links — never change boards, members, alerts or settings, and never see your Vercel token.
-- **No personal data.** Vercel Web Analytics is cookieless and aggregated: answers contain counts, domains, paths, referrers and countries, not people.
-- **Keep the key out of your repo.** Put it in your client's local config (`~/.cursor/mcp.json`, Claude's config, an env var), not a committed file. Revoke it any time in Settings › API & MCP; it stops working on the next request.
-- **Limits.** 600 requests an hour per key, shared with the REST API. `get_site` makes 4–5 requests; the others make 1 (plus one to resolve a board name). Over the limit you get a `429` with `Retry-After`.
+- **Your key gets only your data.** Each call goes to the Lookout API with your key. A key can only see its own workspace. The server keeps no data and does not log answers. The server does not store the key.
+- **A key is read-only by default.** A key can only read data unless you create it with *Allow notes and exports*. A write key can add chart notes and make export links. It cannot change boards, members, alerts or settings. It cannot see your Vercel token.
+- **No personal data.** Vercel Web Analytics does not use cookies. It reports aggregated data. Answers contain counts, domains, paths, referrers and countries. Answers do not identify people.
+- **Keep the key out of your repository.** Put the key in a local configuration of your client. Examples are `~/.cursor/mcp.json`, the Claude configuration and an environment variable. Do not put it in a file that you commit. You can revoke a key at any time in Settings › API & MCP. A revoked key stops on the next request.
+- **Limits.** Each key has 600 requests per hour. The REST API and the MCP server share this limit. `compare_sites` makes 1 request for each site. Each other tool makes 1 request. Above the limit, you get a `429` response with a `Retry-After` header. The hosted server accepts batches of 5 messages or fewer.
+- **Data from outside.** Referrers, paths, UTM values, deployment messages and note texts come from websites and their visitors. The server tells the model to use them as data, not as instructions. Keep keys read-only unless you need the write tools.
 
-Report vulnerabilities to security@lookoutstats.com.
+Send security problems to security@lookoutstats.com.
 
 ## Self-hosting
 
 ```bash
 npm i -g lookout-mcp
-PORT=3000 lookout-mcp-http        # Streamable HTTP on http://localhost:3000 (POST /, GET /health)
+PORT=3000 lookout-mcp-http        # Streamable HTTP on http://127.0.0.1:3000 (POST /, GET /health)
 ```
 
-Or use the handler in your own server — it's a plain `(Request) => Promise<Response>`:
+The server listens on `127.0.0.1` by default. In a container, set `HOST=0.0.0.0`.
+
+You can also use the handler in your own server. The handler is a plain `(Request) => Promise<Response>` function:
 
 ```ts
 import { createHttpHandler } from "lookout-mcp/http";
 export const POST = createHttpHandler();
 ```
 
-This repo deploys to Vercel as is (`vercel.json`, `api/index.js`). `LOOKOUT_API_URL` points either entry at another API base.
+You can deploy this repository to Vercel without changes (`vercel.json`, `api/index.js`). To use a different API base URL with either entry point, set `LOOKOUT_API_URL`.
 
 ## Links
 
-- [Lookout](https://lookoutstats.com) · [API & MCP docs](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json)
+- [Lookout](https://lookoutstats.com) · [API & MCP documentation](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json)
 - [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [MIT License](LICENSE)
 
 Lookout is not affiliated with Vercel Inc.
