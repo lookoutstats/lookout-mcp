@@ -43,6 +43,16 @@ LOOKOUT_API_KEY=lk_live_… npx @modelcontextprotocol/inspector node dist/stdio.
 PORT=3000 node dist/http.js
 ```
 
+## End-to-end check
+
+`npm run e2e` runs every tool, resource and prompt against the live API through the built stdio server. It needs a key:
+
+```bash
+npm run build
+LOOKOUT_API_KEY=lk_live_… npm run e2e          # a read-only key: the write tools must refuse
+LOOKOUT_API_KEY=lk_live_… E2E_WRITE=1 npm run e2e   # a write key: adds a note and makes an export link
+```
+
 ## Pull requests
 
 - One topic per PR, with a test: every tool has one in `test/tools.test.ts`, against a mocked API.
