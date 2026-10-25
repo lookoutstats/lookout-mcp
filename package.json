@@ -1,6 +1,6 @@
 {
   "name": "lookout-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Lookout: ask Claude, Cursor or any MCP client about Vercel Web Analytics across all your projects.",
   "keywords": [
     "mcp",

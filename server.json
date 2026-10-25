@@ -5,12 +5,12 @@
   "description": "Ask about Vercel Web Analytics and Speed Insights across all your projects and boards.",
   "websiteUrl": "https://lookoutstats.com",
   "repository": { "url": "https://github.com/lookoutstats/lookout-mcp", "source": "github" },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "lookout-mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {
