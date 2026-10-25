@@ -7,8 +7,9 @@ import { createServer } from "./server.js";
 import { VERSION } from "./version.js";
 
 // The MCP server over Streamable HTTP (what https://mcp.lookoutstats.com runs): stateless, one JSON answer per POST, no
-// session and no server-sent stream. The caller's Lookout API key comes in the Authorization header and is passed to the
-// REST API as is; the server keeps nothing. The API's 401 and 429 (with Retry-After) come back as this response's status,
+// session and no server-sent stream. The caller's Lookout API key comes in the Authorization header (or X-Lookout-Api-Key,
+// for gateways that keep Authorization for themselves, like Smithery's) and is passed to the REST API as is; the server
+// keeps nothing. The API's 401 and 429 (with Retry-After) come back as this response's status,
 // when nothing in the request succeeded, so a client sees the same limits as the API (600 requests an hour per key). A
 // key that isn't an API key's shape, a batch of more than 5 messages and a body over 1 MB are refused before any API call.
 
@@ -28,7 +29,7 @@ const HEALTH_PATHS = new Set(["/health", "/healthz"]);
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id",
+  "Access-Control-Allow-Headers": "Authorization, X-Lookout-Api-Key, Content-Type, Accept, Mcp-Protocol-Version, Mcp-Session-Id",
   "Access-Control-Expose-Headers": "Retry-After, WWW-Authenticate",
 };
 
@@ -53,7 +54,7 @@ export function createHttpHandler(opts: HttpHandlerOptions = {}): (req: Request)
     if (!MCP_PATHS.has(path)) return json({ error: "not_found", hint: "POST MCP JSON-RPC messages to /" }, 404);
     if (req.method !== "POST") return json(rpcError(null, -32000, "Method not allowed: POST JSON-RPC messages to this endpoint (stateless, no SSE stream)"), 405, { Allow: "POST, OPTIONS" });
 
-    const apiKey = /^Bearer\s+(\S+)$/i.exec(req.headers.get("authorization") ?? "")?.[1];
+    const apiKey = /^Bearer\s+(\S+)$/i.exec(req.headers.get("authorization") ?? "")?.[1] ?? (req.headers.get("x-lookout-api-key")?.trim() || undefined);
     if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) return json(rpcError(null, -32600, "Request body over 1 MB"), 413);
     let body: unknown;
     try {
@@ -61,7 +62,7 @@ export function createHttpHandler(opts: HttpHandlerOptions = {}): (req: Request)
     } catch {
       return json(rpcError(null, -32700, "Parse error"), 400);
     }
-    if (!apiKey) return json(rpcError(body, -32001, "Missing API key: send Authorization: Bearer lk_live_… (Lookout → Settings › API & MCP)"), 401, UNAUTHORIZED_HEADERS);
+    if (!apiKey) return json(rpcError(body, -32001, "Missing API key: send Authorization: Bearer lk_live_… or X-Lookout-Api-Key: lk_live_… (Lookout → Settings › API & MCP)"), 401, UNAUTHORIZED_HEADERS);
     if (!API_KEY.test(apiKey)) return json(rpcError(body, -32001, "That isn't a Lookout API key (lk_live_ and 24 letters and digits)"), 401, UNAUTHORIZED_HEADERS);
     if (Array.isArray(body) && (body.length === 0 || body.length > MAX_BATCH)) return json(rpcError(null, -32600, `A batch holds 1 to ${MAX_BATCH} messages`), 400);
 

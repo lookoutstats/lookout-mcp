@@ -33,6 +33,18 @@ describe("the Streamable HTTP entry", () => {
     expect(res.headers.get("access-control-allow-origin")).toBe("*");
   });
 
+  it("also takes the key in X-Lookout-Api-Key, for gateways that keep Authorization (Smithery)", async () => {
+    const api = mockApi({ "GET /boards": () => boards });
+    const handle = createHttpHandler({ baseUrl: "https://api.test/v1", fetch: api.fetch });
+    const req = new Request(URL_, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json, text/event-stream", "X-Lookout-Api-Key": KEY }, body: JSON.stringify(call("list_boards")) });
+    const res = await handle(req);
+    expect(res.status).toBe(200);
+    expect(api.calls[0]!.auth).toBe(`Bearer ${KEY}`);
+    expect(res.headers.get("access-control-allow-headers")).toContain("X-Lookout-Api-Key");
+    const bad = await handle(new Request(URL_, { method: "POST", headers: { "X-Lookout-Api-Key": "nope" }, body: JSON.stringify(call("list_boards")) }));
+    expect(bad.status).toBe(401);
+  });
+
   it("needs a bearer key: 401 with WWW-Authenticate, and passes the API's 401 through", async () => {
     const handle = createHttpHandler({ fetch: mockApi({}).fetch });
     const missing = await handle(post(call("list_boards"), null));

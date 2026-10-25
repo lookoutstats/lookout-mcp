@@ -84,7 +84,7 @@ Put this in `~/.codeium/windsurf/mcp_config.json`:
 ### Other clients
 
 - stdio: `LOOKOUT_API_KEY=lk_live_… npx -y lookout-mcp`
-- Streamable HTTP: `POST https://mcp.lookoutstats.com` with the header `Authorization: Bearer lk_live_…`
+- Streamable HTTP: `POST https://mcp.lookoutstats.com` with the header `Authorization: Bearer lk_live_…`. If your gateway keeps `Authorization` for itself (Smithery does), send `X-Lookout-Api-Key: lk_live_…` instead.
 
 ## Tools
 
