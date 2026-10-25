@@ -14,6 +14,8 @@ type Body<P extends keyof paths> = paths[P]["post"] extends { requestBody?: { co
 export type BoardList = Answer<"/v1/boards", "get", 200>;
 export type BoardSites = Answer<"/v1/boards/{id}/sites", "get", 200>;
 export type BoardFlow = Answer<"/v1/boards/{id}/flow", "get", 200>;
+export type BoardFixes = Answer<"/v1/boards/{id}/fixes", "get", 200>;
+export type FixStatus = "open" | "snoozed" | "resolved";
 export type BoardNotes = Answer<"/v1/boards/{id}/annotations", "get", 200>;
 export type NoteCreated = Answer<"/v1/boards/{id}/annotations", "post", 201>;
 export type NoteInput = Body<"/v1/boards/{id}/annotations">;
@@ -120,6 +122,7 @@ export function createClient(opts: ClientOptions) {
     listBoards: () => request<BoardList>("GET", "/boards"),
     boardSites: (board: string, range: string) => request<BoardSites>("GET", `/boards/${enc(board)}/sites`, { range }),
     boardFlow: (board: string, range: string) => request<BoardFlow>("GET", `/boards/${enc(board)}/flow`, { range }),
+    boardFixes: (board: string, range: string, status?: FixStatus) => request<BoardFixes>("GET", `/boards/${enc(board)}/fixes`, { range, status }),
     boardNotes: (board: string, site?: string, range?: string) => request<BoardNotes>("GET", `/boards/${enc(board)}/annotations`, { site, range }),
     addNote: (board: string, note: NoteInput) => request<NoteCreated>("POST", `/boards/${enc(board)}/annotations`, undefined, note),
     exportBoard: (board: string, input: ExportInput) => request<BoardExport>("POST", `/boards/${enc(board)}/export`, undefined, input),

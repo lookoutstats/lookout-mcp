@@ -30,6 +30,7 @@ await call("get_site", { site: a.id, range: "7d", board: board.id });
 if (b) await call("compare_sites", { sites: [a.id, b.id], range: "30d", mode: "indexed" });
 await call("get_campaigns", { site: a.id, range: "30d" });
 await call("get_flow", { board: board.id, range: "30d" });
+await call("list_fixes", { board: board.id, range: "30d" });
 await call("get_speed", { site: a.id, range: "7d", device: "mobile" });
 await call("list_alerts");
 const today = new Date().toISOString().slice(0, 10);

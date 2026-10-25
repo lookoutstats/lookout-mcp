@@ -224,6 +224,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/boards/{id}/scorecard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    range?: ("24h" | "7d" | "30d") | string;
+                };
+                header?: never;
+                path: {
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The board's landing pages graded A–D against each other: trend, pages per visit, conversion, Core Web Vitals, visitors sent onward */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            range: string;
+                            mainSite: {
+                                projectId: string;
+                                domain: string;
+                            } | null;
+                            rows: {
+                                projectId: string;
+                                domain: string;
+                                visitors: number;
+                                /** @enum {string} */
+                                grade: "A" | "B" | "C" | "D";
+                                score: number;
+                                factors: {
+                                    /** @enum {string} */
+                                    key: "trend" | "pages" | "conv" | "speed" | "flow";
+                                    label: string;
+                                    value: string;
+                                    /** @enum {string} */
+                                    rating: "good" | "ok" | "weak" | "na";
+                                    bench: string;
+                                    note: string;
+                                    bar: number;
+                                }[];
+                                why: string;
+                                reason: string;
+                                next: string;
+                                fixable: boolean;
+                                partial: boolean;
+                                vitals: {
+                                    lcp: number | null;
+                                    inp: number | null;
+                                    cls: number | null;
+                                } | null;
+                            }[];
+                            unavailable: string[];
+                            /** @default [] */
+                            tooFew: {
+                                projectId: string;
+                                domain: string;
+                                visitors: number;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sites/{id}": {
         parameters: {
             query?: never;
@@ -1087,6 +1190,351 @@ export interface paths {
                 };
                 /** @description Exports aren't set up on this server */
                 503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/boards/{id}/fixes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    range?: string;
+                    status?: "open" | "snoozed" | "resolved";
+                };
+                header?: never;
+                path: {
+                    /** @description A board's id from GET /v1/boards, or its exact name (case-insensitive) */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Everything worth fixing on the board (Core Web Vitals, dead ends, one-page visits, conversion, trend, untagged campaigns, setup), ranked by visitors affected; ?status=open|snoozed|resolved filters the items */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            range: string;
+                            items: {
+                                id: string;
+                                /** @enum {string} */
+                                kind: "speed" | "deadend" | "bounce" | "conversion" | "trend" | "campaigns" | "setup";
+                                projectId: string | null;
+                                domain: string;
+                                framework: string | null;
+                                title: string;
+                                detail: string;
+                                why: string;
+                                verify: string;
+                                impact: number;
+                                /** @enum {string} */
+                                prompt: "speedfix" | "flow" | "grade" | "utm" | "speed" | "events" | "analytics";
+                                context: {
+                                    grade?: {
+                                        /** @enum {string} */
+                                        grade: "A" | "B" | "C" | "D";
+                                        factors: {
+                                            /** @enum {string} */
+                                            key: "trend" | "pages" | "conv" | "speed" | "flow";
+                                            label: string;
+                                            value: string;
+                                            /** @enum {string} */
+                                            rating: "good" | "ok" | "weak" | "na";
+                                            bench: string;
+                                            note: string;
+                                            bar: number;
+                                        }[];
+                                        vitals: {
+                                            lcp: number | null;
+                                            inp: number | null;
+                                            cls: number | null;
+                                        } | null;
+                                    };
+                                    speed?: {
+                                        /** @enum {string} */
+                                        device: "all" | "mobile" | "desktop";
+                                        values: {
+                                            lcp: number | null;
+                                            inp: number | null;
+                                            cls: number | null;
+                                        };
+                                    };
+                                    mainSite?: string | null;
+                                };
+                                /** @enum {string} */
+                                status: "open" | "snoozed" | "resolved";
+                                snoozedUntil: number | null;
+                                resolvedAt: number | null;
+                            }[];
+                            counts: {
+                                open: number;
+                                snoozed: number;
+                                resolved: number;
+                            };
+                            resolvedThisMonth: number;
+                            unavailable: string[];
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/fixes/{itemId}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description A Fix list item's id (`kind:domain`) from GET /v1/boards/{id}/fixes */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        boardId: string;
+                        range?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Resolved; a note “Resolved: {title}” is added to the site on that board */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            /** @enum {string} */
+                            status: "open" | "snoozed" | "resolved";
+                            snoozedUntil: number | null;
+                            resolvedAt: number | null;
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The key is read-only: create one with "Allow notes and exports" */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board (or site on it) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/fixes/{itemId}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description A Fix list item's id (`kind:domain`) from GET /v1/boards/{id}/fixes */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Back on the open list */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            /** @enum {string} */
+                            status: "open" | "snoozed" | "resolved";
+                            snoozedUntil: number | null;
+                            resolvedAt: number | null;
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The key is read-only: create one with "Allow notes and exports" */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board (or site on it) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/fixes/{itemId}/snooze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description A Fix list item's id (`kind:domain`) from GET /v1/boards/{id}/fixes */
+                    itemId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Hidden for a week; it comes back on its own */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            /** @enum {string} */
+                            status: "open" | "snoozed" | "resolved";
+                            snoozedUntil: number | null;
+                            resolvedAt: number | null;
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The key is read-only: create one with "Allow notes and exports" */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board (or site on it) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
                     headers: {
                         [name: string]: unknown;
                     };

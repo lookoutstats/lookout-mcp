@@ -28,6 +28,8 @@ const SiteId = z
 const quoted = (s: string) => JSON.stringify(s.length > 60 ? `${s.slice(0, 59)}…` : s);
 /** At most this many campaign rows go back to the model; the rest are counted. */
 const CAMPAIGNS_SHOWN = 20;
+/** At most this many Fix list items go back to the model; the rest are counted. */
+const FIXES_SHOWN = 20;
 
 /** A tool's answer: one human line, then the compact JSON (also as structured content). */
 export function answer(summary: string, data: object): CallToolResult {
@@ -233,6 +235,32 @@ export function createServer(client: LookoutClient, opts: { now?: () => Date } =
       const summary =
         `${data.site.domain} (${device}) · ${data.status.replace("_", " ")}: LCP ${ms(data.lcpMs)}, INP ${ms(data.inpMs)}, CLS ${cls(data.cls)} from ${plural(data.samples, "sample")}` +
         (slowest ? `; slowest route ${quoted(slowest.route)} (LCP ${ms(slowest.lcpMs)}).` : ".");
+      return answer(summary, data);
+    },
+  );
+
+  tool(
+    "list_fixes",
+    {
+      title: "List what to fix",
+      description:
+        "A board's Fix list for a range, ranked by visitors affected: slow Core Web Vitals, sites that send nobody onward, sites most visitors leave after one page, low conversion, falling traffic, untagged social campaigns, and setup gaps (no goal, no Speed Insights, no Web Analytics). Each item has its kind, site, title, detail, why it matters and how to verify a fix. status: open (default), snoozed or resolved.",
+      inputSchema: { board: BoardRef, range: RangeSchema, status: z.enum(["open", "snoozed", "resolved"]).default("open").describe("open, snoozed or resolved") },
+      annotations: read,
+    },
+    async ({ board, range, status }) => {
+      const r = key(range);
+      const all = await client.boardFixes(board, r, status);
+      const items = all.items.slice(0, FIXES_SHOWN).map(({ id, kind, projectId, domain, title, detail, why, verify, impact, status, snoozedUntil, resolvedAt }) => ({
+        id, kind, projectId, domain, title, detail, why, verify, impact, status, snoozedUntil, resolvedAt,
+      }));
+      const data = { range: all.range, status, counts: all.counts, resolvedThisMonth: all.resolvedThisMonth, items, ...(all.items.length > FIXES_SHOWN ? { more: all.items.length - FIXES_SHOWN } : {}), unavailable: all.unavailable };
+      const top = all.items[0];
+      const summary = top
+        ? `${plural(all.items.length, `${status} item`)} (${rangeLabel(r)}); top ${quoted(top.title)}, ${int(top.impact)} visitors affected.`
+        : status === "open"
+          ? `Nothing to fix on this board (${rangeLabel(r)}).`
+          : `No ${status} items on this board.`;
       return answer(summary, data);
     },
   );
