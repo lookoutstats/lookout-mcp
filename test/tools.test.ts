@@ -6,7 +6,7 @@ describe("tools (one per tool, over a mocked Lookout API)", () => {
     const { client } = await connect({});
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ["add_annotation", "compare_sites", "export_board", "get_board", "get_campaigns", "get_flow", "get_site", "get_speed", "list_alerts", "list_boards"].sort(),
+      ["add_annotation", "compare_sites", "export_board", "get_board", "get_campaigns", "get_flow", "get_site", "get_speed", "list_alerts", "list_boards", "list_fixes"].sort(),
     );
     for (const t of tools) {
       expect(t.description!.length).toBeGreaterThan(40);
@@ -110,6 +110,24 @@ describe("tools (one per tool, over a mocked Lookout API)", () => {
     const r = await tool("get_speed", { site: "prj_a", device: "mobile" });
     expect(r.summary).toBe('acme.com (mobile) · poor: LCP 4.2s, INP 520ms, CLS 0.30 from 500 samples; slowest route "/pricing" (LCP 5.1s).');
     expect(calls[0]!.query).toEqual({ range: "7d", device: "mobile" });
+  });
+
+  it("list_fixes: open items by visitors affected, the status filter, and nothing to fix", async () => {
+    const item = {
+      id: "speed:acme.com", kind: "speed", projectId: "prj_a", domain: "acme.com", framework: "nextjs", title: "Fix Core Web Vitals on acme.com", detail: "LCP 4.2s (goal 2.5s)",
+      why: "Slow pages lose visitors.", verify: "Speed tab: LCP under 2.5s.", impact: 1200, prompt: "speedfix", context: { speed: { device: "all", values: { lcp: 4200, inp: 90, cls: 0.02 } } },
+      status: "open", snoozedUntil: null, resolvedAt: null,
+    };
+    let items = [item, { ...item, id: "nogoal:lp.acme.com", kind: "setup", projectId: "prj_b", domain: "lp.acme.com", title: "Set a goal on lp.acme.com", impact: 300 }];
+    const { tool, calls } = await connect({ "GET /boards/{id}/fixes": () => ({ range: "7d", items, counts: { open: items.length, snoozed: 0, resolved: 1 }, resolvedThisMonth: 1, unavailable: [] }) });
+    const r = await tool("list_fixes", { board: BOARD });
+    expect(r.summary).toBe('2 open items (last 7 days); top "Fix Core Web Vitals on acme.com", 1,200 visitors affected.');
+    expect(calls[0]).toMatchObject({ path: `/boards/${BOARD}/fixes`, query: { range: "7d", status: "open" } });
+    expect((r.data as { items: object[] }).items[0]).not.toHaveProperty("context");
+    await tool("list_fixes", { board: BOARD, status: "resolved", range: "30d" });
+    expect(calls.at(-1)!.query).toEqual({ range: "30d", status: "resolved" });
+    items = [];
+    expect((await tool("list_fixes", { board: BOARD })).summary).toBe("Nothing to fix on this board (last 7 days).");
   });
 
   it("list_alerts: rules and what fired", async () => {
