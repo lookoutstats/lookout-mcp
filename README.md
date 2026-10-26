@@ -4,6 +4,7 @@
 [![CI](https://github.com/lookoutstats/lookout-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/lookoutstats/lookout-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-141412)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP%20%2B%20stdio-141412)](https://modelcontextprotocol.io)
+[![Listed on mcpservers.org](https://mcpservers.org/badge.svg)](https://mcpservers.org/servers/lookoutstats/lookout-mcp)
 
 This is the MCP server for **[Lookout](https://lookoutstats.com)**. Lookout shows Vercel Web Analytics for all your projects in one view.
 
