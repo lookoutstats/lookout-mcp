@@ -129,6 +129,20 @@ These rules apply to all tools:
 4. "Are our sites passing Core Web Vitals on mobile? Which route is slowest?"
 5. "Do my landing pages send visitors to the main site? Which ones are dead ends?"
 
+## Skills
+
+The [lookout-skills](https://github.com/lookoutstats/lookout-skills) repository adds two agent skills on top of this server:
+
+- `lookout-fix` finds the site of the current repository on your boards. It takes the top open item of the Fix list and makes the change in your code.
+- `lookout-report` writes a weekly or monthly report from all your boards.
+
+In Claude Code, one plugin installs the skills and this server:
+
+```text
+/plugin marketplace add lookoutstats/lookout-skills
+/plugin install lookout@lookout
+```
+
 ## Security
 
 - **Your key gets only your data.** Each call goes to the Lookout API with your key. A key can only see its own workspace. The server keeps no data and does not log answers. The server does not store the key.
@@ -160,7 +174,7 @@ You can deploy this repository to Vercel without changes (`vercel.json`, `api/in
 
 ## Links
 
-- [Lookout](https://lookoutstats.com) · [API & MCP documentation](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json)
+- [Lookout](https://lookoutstats.com) · [API & MCP documentation](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json) · [Skills](https://github.com/lookoutstats/lookout-skills)
 - [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [MIT License](LICENSE)
 
 Lookout is not affiliated with Vercel Inc.
