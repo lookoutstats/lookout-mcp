@@ -140,7 +140,7 @@ In Claude Code, one plugin installs the skills and this server:
 
 ```text
 /plugin marketplace add lookoutstats/lookout-skills
-/plugin install lookout@lookout
+/plugin install lookoutstats@lookout
 ```
 
 ## Security
