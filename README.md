@@ -174,7 +174,7 @@ You can deploy this repository to Vercel without changes (`vercel.json`, `api/in
 
 ## Links
 
-- [Lookout](https://lookoutstats.com) · [API & MCP documentation](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json) · [Skills](https://github.com/lookoutstats/lookout-skills)
+- [Lookout](https://lookoutstats.com) · [API & MCP documentation](https://lookoutstats.com/vercel-analytics-api-mcp) · [OpenAPI](https://api.lookoutstats.com/v1/openapi.json) · [Skills](https://github.com/lookoutstats/lookout-skills) · [vercel-analytics-api](https://github.com/lookoutstats/vercel-analytics-api) (a typed client for Vercel's own analytics API)
 - [Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [MIT License](LICENSE)
 
 Lookout is not affiliated with Vercel Inc.
