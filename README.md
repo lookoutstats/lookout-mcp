@@ -8,6 +8,8 @@
 
 This is the MCP server for **[Lookout](https://lookoutstats.com)**. Lookout shows Vercel Web Analytics for all your projects in one view.
 
+[![Lookout: every Vercel project on one board, with drop alerts, a scorecard, a TV mode and a phone app](https://raw.githubusercontent.com/lookoutstats/lookout-mcp/main/docs/lookout-demo.webp)](https://lookoutstats.com/demo)
+
 Connect Claude, Cursor or a different MCP client. Then ask about your sites: visitors, sources, campaigns, Core Web Vitals and traffic between your sites. The answers come from your real numbers.
 
 > "Which landing page dropped most this week, and what deployed right before?"
