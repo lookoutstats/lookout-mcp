@@ -27,12 +27,21 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The workspace's boards. */
                             boards: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board's id. Use it in /v1/boards/{id}/… paths.
+                                 */
                                 id: string;
+                                /** @description The board's name. */
                                 name: string;
+                                /** @description How many sites are on the board. */
                                 siteCount: number;
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description When the board was created (ISO 8601).
+                                 */
                                 createdAt: string;
                             }[];
                         };
@@ -90,31 +99,54 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The board. */
                             board: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board's id.
+                                 */
                                 id: string;
+                                /** @description The board's name. */
                                 name: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description Every site on the board, busiest first. */
                             sites: {
+                                /** @description The site's Vercel project id. Use it in /v1/sites/{id}/… paths. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
+                                /** @description Unique visitors in the range. */
                                 visitors: number;
+                                /** @description Visitors in the previous period of the same length; null when there is nothing to compare with. */
                                 previousVisitors: number | null;
+                                /** @description Change in visitors against the previous period, in percent (12.5 is +12.5%); null when there is nothing to compare with. */
                                 change: number | null;
+                                /** @description Page views in the range. */
                                 pageviews: number;
+                                /** @description Page views per visitor; null when it can't be worked out. */
                                 pagesPerVisit: number | null;
+                                /** @description The referrer that sent the most visitors; null when there is none. */
                                 topSource: {
+                                    /** @description The referrer host. */
                                     name: string;
+                                    /** @description Percent of the site's visitors, 0–100. */
                                     share: number;
                                 } | null;
+                                /** @description The country with the most visitors; null when there is none. */
                                 topCountry: {
+                                    /** @description The country. */
                                     name: string;
+                                    /** @description Percent of the site's visitors, 0–100. */
                                     share: number;
                                 } | null;
+                                /** @description The site's goal, a Vercel custom event; null when the site has no goal. */
                                 goal: string | null;
+                                /** @description Goal conversions in the range; null when the site has no goal. */
                                 conversions: number | null;
                             }[];
+                            /** @description Sites whose figures couldn't be read just now (team access lost or Vercel slow), by domain. */
                             unavailable: string[];
                         };
                     };
@@ -178,16 +210,26 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description The board's sites that answered, with their visitors. */
                             nodes: {
+                                /** @description The site's Vercel project id. */
                                 projectId: string;
+                                /** @description The site's production domain. */
                                 domain: string;
+                                /** @description Unique visitors in the range. */
                                 visitors: number;
+                                /** @description Where most of the site's visitors came from outside the board: up to 3 referrer hosts or Direct, busiest first. */
                                 sources: string[];
                             }[];
+                            /** @description Visitors who arrived at one site of the board from another. */
                             hops: {
+                                /** @description The project id of the site they came from. */
                                 from: string;
+                                /** @description The project id of the site they arrived at. */
                                 to: string;
+                                /** @description Visitors who arrived at to from from. */
                                 visitors: number;
                             }[];
                         };
@@ -252,45 +294,85 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description The board's main site (its busiest), which isn't graded; null when the board has none. */
                             mainSite: {
+                                /** @description The site's Vercel project id. */
                                 projectId: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             } | null;
+                            /** @description One row per graded landing page, best first. */
                             rows: {
+                                /** @description The site's Vercel project id. */
                                 projectId: string;
+                                /** @description The site's production domain. */
                                 domain: string;
+                                /** @description Unique visitors in the range. */
                                 visitors: number;
-                                /** @enum {string} */
+                                /**
+                                 * @description The grade, from A (best) to D.
+                                 * @enum {string}
+                                 */
                                 grade: "A" | "B" | "C" | "D";
+                                /** @description Points out of the most the graded factors allow, 0–1. Rows sort by it. */
                                 score: number;
+                                /** @description What the grade is made of. */
                                 factors: {
-                                    /** @enum {string} */
-                                    key: "trend" | "pages" | "conv" | "speed" | "flow";
+                                    /**
+                                     * @description The factor: trend, pages (pages per visit), conv (conversion), speed (Core Web Vitals), flow (visitors sent onward) or paid (cost per conversion).
+                                     * @enum {string}
+                                     */
+                                    key: "trend" | "pages" | "conv" | "speed" | "flow" | "paid";
+                                    /** @description The factor's name as the dashboard shows it. */
                                     label: string;
+                                    /** @description The value as the dashboard shows it (for example +12% or 3.2%); — when not graded. */
                                     value: string;
-                                    /** @enum {string} */
+                                    /**
+                                     * @description good, ok or weak; na when the factor isn't graded.
+                                     * @enum {string}
+                                     */
                                     rating: "good" | "ok" | "weak" | "na";
+                                    /** @description What the value is measured against (for example vs previous week). */
                                     bench: string;
+                                    /** @description A short note on the value. */
                                     note: string;
+                                    /** @description 0–100: the length of the bar under the value. */
                                     bar: number;
                                 }[];
+                                /** @description A short reason: what holds the page back, or what it does well. */
                                 why: string;
+                                /** @description The reason in one full sentence. */
                                 reason: string;
+                                /** @description What to fix first: the fix for the worst factor. */
                                 next: string;
+                                /** @description Whether any factor is weak. */
                                 fixable: boolean;
+                                /** @description Whether some factor couldn't be graded (no goal, or Speed Insights off). */
                                 partial: boolean;
+                                /** @description The p75 Core Web Vitals behind the speed factor; null without Speed Insights. */
                                 vitals: {
+                                    /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                     lcp: number | null;
+                                    /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                     inp: number | null;
+                                    /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                     cls: number | null;
                                 } | null;
                             }[];
+                            /** @description Sites whose figures couldn't be read just now (team access lost or Vercel slow), by domain. */
                             unavailable: string[];
-                            /** @default [] */
+                            /**
+                             * @description Landing pages with too few visitors to grade, busiest first.
+                             * @default []
+                             */
                             tooFew: {
+                                /** @description The site's Vercel project id. */
                                 projectId: string;
+                                /** @description The site's production domain. */
                                 domain: string;
+                                /** @description Unique visitors in the range. */
                                 visitors: number;
                             }[];
                         };
@@ -355,29 +437,52 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The project's name in Vercel. */
                                 name: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description Core Web Vitals from Vercel Speed Insights: p75 of real visitors, production only, for the range. */
                             speed: {
+                                /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                 lcpMs: number | null;
+                                /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                 inpMs: number | null;
+                                /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                 cls: number | null;
+                                /** @description How many page loads the values come from. */
                                 samples: number;
-                                /** @enum {string} */
+                                /**
+                                 * @description passing when LCP, INP and CLS are all good on every device with samples; else needs_work or poor; off when there are no samples (Speed Insights not on).
+                                 * @enum {string}
+                                 */
                                 status: "passing" | "needs_work" | "poor" | "off";
+                                /** @description The values for mobile visitors; null when there are none. */
                                 mobile: {
+                                    /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                     lcpMs: number | null;
+                                    /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                     inpMs: number | null;
+                                    /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                     cls: number | null;
+                                    /** @description How many page loads the values come from. */
                                     samples: number;
                                 } | null;
+                                /** @description The values for desktop visitors; null when there are none. */
                                 desktop: {
+                                    /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                     lcpMs: number | null;
+                                    /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                     inpMs: number | null;
+                                    /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                     cls: number | null;
+                                    /** @description How many page loads the values come from. */
                                     samples: number;
                                 } | null;
                             };
@@ -443,22 +548,39 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
-                            /** @enum {string} */
+                            /**
+                             * @description hour for 24h, day for every other range.
+                             * @enum {string}
+                             */
                             granularity: "hour" | "day";
+                            /** @description Visitors per hour or day, oldest first. */
                             points: {
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description The start of the hour or day (ISO 8601).
+                                 */
                                 start: string;
+                                /** @description Visitors in this hour or day. */
                                 visitors: number;
+                                /** @description Visitors in the matching hour or day of the previous period; null when there is nothing to compare with. */
                                 previousVisitors: number | null;
                             }[];
+                            /** @description Unique visitors in the range. */
                             visitors: number;
+                            /** @description Visitors in the previous period of the same length; null when there is nothing to compare with. */
                             previousVisitors: number | null;
+                            /** @description Change in visitors against the previous period, in percent (12.5 is +12.5%); null when there is nothing to compare with. */
                             change: number | null;
+                            /** @description Page views in the range. */
                             pageviews: number;
                         };
                     };
@@ -522,22 +644,44 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
-                            /** @enum {string} */
+                            /**
+                             * @description Always ok. plan_required is no longer sent: see mode.
+                             * @enum {string}
+                             */
                             status: "ok" | "plan_required";
+                            /**
+                             * @description Where the campaigns come from: utm (Vercel's UTM tags, with Web Analytics Plus or Enterprise), events (the site's campaign custom event) or platform (no Plus: the ad platform of the referrer).
+                             * @enum {string}
+                             */
+                            mode: "utm" | "events" | "platform";
+                            /** @description The site's goal, a Vercel custom event; null when the site has no goal. */
                             goal: string | null;
+                            /** @description All the site's visitors in the range, tagged or not. */
                             visitors: number;
+                            /** @description One row per campaign and source. */
                             campaigns: {
+                                /** @description The utm_campaign value. In platform mode, the ad platform. */
                                 campaign: string;
+                                /** @description The utm_source value. In platform mode, the referrer host. */
                                 source: string;
+                                /** @description The utm_medium value. In platform mode, referrer. */
                                 medium: string;
+                                /** @description Visitors from this campaign and source. */
                                 visitors: number;
+                                /** @description Visitors from this campaign and source in the previous period. */
                                 previousVisitors: number;
+                                /** @description Page views from this campaign and source. */
                                 pageviews: number;
+                                /** @description Goal conversions from this campaign and source; null when the site has no goal. */
                                 conversions: number | null;
                             }[];
                         };
@@ -567,6 +711,251 @@ export interface paths {
             };
         };
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sites/{id}/campaigns/{utm}/spend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description A site's Vercel project id, from GET /v1/boards/{id}/sites */
+                    id: string;
+                    /** @description The utm_campaign value, URL-encoded */
+                    utm: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The campaign's spend: this period's row (else the latest), and every period's, newest first */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description The row for this period, else the latest one; null when the campaign has no spend. */
+                            current: {
+                                /** @description The campaign (its utm_campaign value). */
+                                campaign: string;
+                                /**
+                                 * @description Where the money went: google, meta, linkedin, tiktok or other.
+                                 * @enum {string}
+                                 */
+                                platform: "google" | "meta" | "linkedin" | "tiktok" | "other";
+                                /** @description What was paid for the period, in currency. */
+                                amount: number;
+                                /**
+                                 * @description ILS, USD, EUR or GBP.
+                                 * @enum {string}
+                                 */
+                                currency: "USD" | "EUR" | "GBP" | "ILS";
+                                /**
+                                 * @description month (a calendar month) or 30d (30 days from periodStart).
+                                 * @enum {string}
+                                 */
+                                period: "month" | "30d";
+                                /** @description The first day of the period (YYYY-MM-DD). */
+                                periodStart: string;
+                                /** @description Whether the amount repeats every month until it is changed. */
+                                repeatMonthly: boolean;
+                            } | null;
+                            /** @description Every row, newest first. */
+                            history: {
+                                /** @description The campaign (its utm_campaign value). */
+                                campaign: string;
+                                /**
+                                 * @description Where the money went: google, meta, linkedin, tiktok or other.
+                                 * @enum {string}
+                                 */
+                                platform: "google" | "meta" | "linkedin" | "tiktok" | "other";
+                                /** @description What was paid for the period, in currency. */
+                                amount: number;
+                                /**
+                                 * @description ILS, USD, EUR or GBP.
+                                 * @enum {string}
+                                 */
+                                currency: "USD" | "EUR" | "GBP" | "ILS";
+                                /**
+                                 * @description month (a calendar month) or 30d (30 days from periodStart).
+                                 * @enum {string}
+                                 */
+                                period: "month" | "30d";
+                                /** @description The first day of the period (YYYY-MM-DD). */
+                                periodStart: string;
+                                /** @description Whether the amount repeats every month until it is changed. */
+                                repeatMonthly: boolean;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such site */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description A site's Vercel project id, from GET /v1/boards/{id}/sites */
+                    id: string;
+                    /** @description The utm_campaign value, URL-encoded */
+                    utm: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description What was paid for the period, in currency. */
+                        amount: number;
+                        /**
+                         * @description ILS, USD, EUR or GBP.
+                         * @enum {string}
+                         */
+                        currency: "USD" | "EUR" | "GBP" | "ILS";
+                        /**
+                         * @description Where the money went: google, meta, linkedin, tiktok or other.
+                         * @enum {string}
+                         */
+                        platform: "google" | "meta" | "linkedin" | "tiktok" | "other";
+                        /**
+                         * @description month (a calendar month) or 30d (30 days from periodStart).
+                         * @enum {string}
+                         */
+                        period: "month" | "30d";
+                        /** @description The first day of the period to set (YYYY-MM-DD). Without it, the period that holds today. A past period changes only that period. */
+                        periodStart?: string;
+                        /** @description Whether the amount repeats every month until it is changed. */
+                        repeatMonthly: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Saved: that period's row (this period's when periodStart is omitted) replaced; history is kept */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description The row for this period, else the latest one; null when the campaign has no spend. */
+                            current: {
+                                /** @description The campaign (its utm_campaign value). */
+                                campaign: string;
+                                /**
+                                 * @description Where the money went: google, meta, linkedin, tiktok or other.
+                                 * @enum {string}
+                                 */
+                                platform: "google" | "meta" | "linkedin" | "tiktok" | "other";
+                                /** @description What was paid for the period, in currency. */
+                                amount: number;
+                                /**
+                                 * @description ILS, USD, EUR or GBP.
+                                 * @enum {string}
+                                 */
+                                currency: "USD" | "EUR" | "GBP" | "ILS";
+                                /**
+                                 * @description month (a calendar month) or 30d (30 days from periodStart).
+                                 * @enum {string}
+                                 */
+                                period: "month" | "30d";
+                                /** @description The first day of the period (YYYY-MM-DD). */
+                                periodStart: string;
+                                /** @description Whether the amount repeats every month until it is changed. */
+                                repeatMonthly: boolean;
+                            } | null;
+                            /** @description Every row, newest first. */
+                            history: {
+                                /** @description The campaign (its utm_campaign value). */
+                                campaign: string;
+                                /**
+                                 * @description Where the money went: google, meta, linkedin, tiktok or other.
+                                 * @enum {string}
+                                 */
+                                platform: "google" | "meta" | "linkedin" | "tiktok" | "other";
+                                /** @description What was paid for the period, in currency. */
+                                amount: number;
+                                /**
+                                 * @description ILS, USD, EUR or GBP.
+                                 * @enum {string}
+                                 */
+                                currency: "USD" | "EUR" | "GBP" | "ILS";
+                                /**
+                                 * @description month (a calendar month) or 30d (30 days from periodStart).
+                                 * @enum {string}
+                                 */
+                                period: "month" | "30d";
+                                /** @description The first day of the period (YYYY-MM-DD). */
+                                periodStart: string;
+                                /** @description Whether the amount repeats every month until it is changed. */
+                                repeatMonthly: boolean;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description The key is read-only: create one with "Allow notes and exports" */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board (or site on it) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         post?: never;
         delete?: never;
         options?: never;
@@ -604,73 +993,138 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The project's name in Vercel. */
                                 name: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description The site's goal, a Vercel custom event; null when the site has no goal. */
                             goal: string | null;
-                            /** @enum {string} */
+                            /**
+                             * @description hour for 24h, day for every other range.
+                             * @enum {string}
+                             */
                             granularity: "hour" | "day";
+                            /** @description Unique visitors in the range. */
                             visitors: number;
+                            /** @description Visitors in the previous period of the same length; null when there is nothing to compare with. */
                             previousVisitors: number | null;
+                            /** @description Change in visitors against the previous period, in percent (12.5 is +12.5%); null when there is nothing to compare with. */
                             change: number | null;
+                            /** @description Page views in the range. */
                             pageviews: number;
+                            /** @description Visitors per hour or day, oldest first. */
                             points: {
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description The start of the hour or day (ISO 8601).
+                                 */
                                 start: string;
+                                /** @description Visitors in this hour or day. */
                                 visitors: number;
+                                /** @description Visitors in the matching hour or day of the previous period; null when there is nothing to compare with. */
                                 previousVisitors: number | null;
                             }[];
+                            /** @description The top 5 referrers. */
                             referrers: {
+                                /** @description The referrer host. */
                                 name: string;
+                                /** @description Visitors from this referrer. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
+                            /** @description The top 5 countries. */
                             countries: {
+                                /** @description The country. */
                                 name: string;
+                                /** @description Visitors from this country. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
+                            /** @description The top 5 pages. */
                             pages: {
+                                /** @description The page's path. */
                                 name: string;
+                                /** @description Visitors who saw this page. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
+                            /** @description Production deployments in the range, newest first (at most 20); null when Vercel didn't answer. */
                             deployments: {
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description When the deployment was made (ISO 8601).
+                                 */
                                 at: string;
+                                /** @description The commit message; null when there is none. */
                                 message: string | null;
+                                /** @description The git branch; null when there is none. */
                                 branch: string | null;
+                                /** @description Vercel's state for the deployment, for example READY. */
                                 state: string;
                             }[] | null;
+                            /** @description Core Web Vitals from Vercel Speed Insights: p75 of real visitors, production only, for the range. */
                             speed: {
+                                /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                 lcpMs: number | null;
+                                /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                 inpMs: number | null;
+                                /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                 cls: number | null;
+                                /** @description How many page loads the values come from. */
                                 samples: number;
-                                /** @enum {string} */
+                                /**
+                                 * @description passing when LCP, INP and CLS are all good on every device with samples; else needs_work or poor; off when there are no samples (Speed Insights not on).
+                                 * @enum {string}
+                                 */
                                 status: "passing" | "needs_work" | "poor" | "off";
+                                /** @description The values for mobile visitors; null when there are none. */
                                 mobile: {
+                                    /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                     lcpMs: number | null;
+                                    /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                     inpMs: number | null;
+                                    /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                     cls: number | null;
+                                    /** @description How many page loads the values come from. */
                                     samples: number;
                                 } | null;
+                                /** @description The values for desktop visitors; null when there are none. */
                                 desktop: {
+                                    /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                     lcpMs: number | null;
+                                    /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                     inpMs: number | null;
+                                    /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                     cls: number | null;
+                                    /** @description How many page loads the values come from. */
                                     samples: number;
                                 } | null;
                             };
+                            /** @description The board's notes. */
                             notes?: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The note's id.
+                                 */
                                 id: string;
+                                /** @description The site the note is for; null when it is for every site on the board. */
                                 siteId: string | null;
-                                /** Format: date */
+                                /**
+                                 * Format: date
+                                 * @description The day the note is pinned to (YYYY-MM-DD).
+                                 */
                                 date: string;
+                                /** @description The note's text. */
                                 text: string;
                             }[];
                         };
@@ -735,24 +1189,40 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description The top 5 referrers. */
                             referrers: {
+                                /** @description The referrer host. */
                                 name: string;
+                                /** @description Visitors from this referrer. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
+                            /** @description The top 5 countries. */
                             countries: {
+                                /** @description The country. */
                                 name: string;
+                                /** @description Visitors from this country. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
+                            /** @description The top 5 pages. */
                             pages: {
+                                /** @description The page's path. */
                                 name: string;
+                                /** @description Visitors who saw this page. */
                                 visitors: number;
+                                /** @description Percent of the site's visitors, 0–100. */
                                 share: number;
                             }[];
                         };
@@ -817,16 +1287,27 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description Production deployments in the range, newest first (at most 20). */
                             deployments: {
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description When the deployment was made (ISO 8601).
+                                 */
                                 at: string;
+                                /** @description The commit message; null when there is none. */
                                 message: string | null;
+                                /** @description The git branch; null when there is none. */
                                 branch: string | null;
+                                /** @description Vercel's state for the deployment, for example READY. */
                                 state: string;
                             }[];
                         };
@@ -893,22 +1374,40 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The site. */
                             site: {
+                                /** @description The site's Vercel project id. */
                                 id: string;
+                                /** @description The site's production domain. */
                                 domain: string;
                             };
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
-                            /** @enum {string} */
+                            /**
+                             * @description all, mobile or desktop.
+                             * @enum {string}
+                             */
                             device: "all" | "mobile" | "desktop";
-                            /** @enum {string} */
+                            /**
+                             * @description passing, needs_work or poor for this device; off when there are no samples (Speed Insights not on).
+                             * @enum {string}
+                             */
                             status: "passing" | "needs_work" | "poor" | "off";
+                            /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                             lcpMs: number | null;
+                            /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                             inpMs: number | null;
+                            /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                             cls: number | null;
+                            /** @description How many page loads the values come from. */
                             samples: number;
+                            /** @description The device's slowest routes by LCP. */
                             routes: {
+                                /** @description The route, as the app names it (for example /blog/[slug]). */
                                 route: string;
+                                /** @description The route's Largest Contentful Paint at p75, in milliseconds. */
                                 lcpMs: number;
+                                /** @description How many page loads of this route the value comes from. */
                                 samples: number;
                             }[];
                         };
@@ -976,19 +1475,36 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The board. */
                             board: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board's id.
+                                 */
                                 id: string;
+                                /** @description The board's name. */
                                 name: string;
                             };
+                            /** @description The board's notes. */
                             notes: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The note's id.
+                                 */
                                 id: string;
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board the note is on.
+                                 */
                                 boardId: string;
+                                /** @description The site the note is for; null when it is for every site on the board. */
                                 siteId: string | null;
-                                /** Format: date */
+                                /**
+                                 * Format: date
+                                 * @description The day the note is pinned to (YYYY-MM-DD).
+                                 */
                                 date: string;
+                                /** @description The note's text. */
                                 text: string;
                             }[];
                         };
@@ -1031,9 +1547,14 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** Format: date */
+                        /**
+                         * Format: date
+                         * @description The day the note is pinned to (YYYY-MM-DD).
+                         */
                         date: string;
+                        /** @description The note's text. It is trimmed and kept to its first 80 characters. */
                         text: string;
+                        /** @description Only for this site. Without it, the note is for every site on the board. */
                         siteId?: string;
                     };
                 };
@@ -1046,14 +1567,26 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The note that was added. */
                             note: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The note's id.
+                                 */
                                 id: string;
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board the note is on.
+                                 */
                                 boardId: string;
+                                /** @description The site the note is for; null when it is for every site on the board. */
                                 siteId: string | null;
-                                /** Format: date */
+                                /**
+                                 * Format: date
+                                 * @description The day the note is pinned to (YYYY-MM-DD).
+                                 */
                                 date: string;
+                                /** @description The note's text. */
                                 text: string;
                             };
                         };
@@ -1125,11 +1658,13 @@ export interface paths {
                 content: {
                     "application/json": {
                         /**
+                         * @description pdf (the default) or csv.
                          * @default pdf
                          * @enum {string}
                          */
                         format?: "pdf" | "csv";
                         /**
+                         * @description The period to export: 24h, 7d (the default) or 30d.
                          * @default 7d
                          * @enum {string}
                          */
@@ -1145,17 +1680,32 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The board. */
                             board: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The board's id.
+                                 */
                                 id: string;
+                                /** @description The board's name. */
                                 name: string;
                             };
-                            /** @enum {string} */
+                            /**
+                             * @description pdf or csv.
+                             * @enum {string}
+                             */
                             format: "pdf" | "csv";
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
-                            /** Format: uri */
+                            /**
+                             * Format: uri
+                             * @description The download link.
+                             */
                             url: string;
-                            /** Format: date-time */
+                            /**
+                             * Format: date-time
+                             * @description When the link stops working, 5 minutes after it was made (ISO 8601).
+                             */
                             expiresAt: string;
                         };
                     };
@@ -1232,64 +1782,140 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD). */
                             range: string;
+                            /** @description The board's items, ranked by visitors affected. */
                             items: {
+                                /** @description The item's id, kind:domain (for example speed:acme.com). Use it in /v1/fixes/{itemId}/… paths. */
                                 id: string;
-                                /** @enum {string} */
-                                kind: "speed" | "deadend" | "bounce" | "conversion" | "trend" | "campaigns" | "setup";
+                                /**
+                                 * @description speed, deadend, bounce, conversion, trend, campaigns, spend or setup.
+                                 * @enum {string}
+                                 */
+                                kind: "speed" | "deadend" | "bounce" | "conversion" | "trend" | "campaigns" | "spend" | "setup";
+                                /** @description The site's Vercel project id; null for a team project Lookout doesn't track yet. */
                                 projectId: string | null;
+                                /** @description The site's production domain. */
                                 domain: string;
+                                /** @description The site's framework preset in Vercel (for example nextjs); null when it isn't known. */
                                 framework: string | null;
+                                /** @description What to fix. */
                                 title: string;
+                                /** @description The numbers behind it. */
                                 detail: string;
+                                /** @description Why it matters. */
                                 why: string;
+                                /** @description Where the result shows once it is fixed. */
                                 verify: string;
+                                /** @description Visitors affected in the range. For a spend item, the spend in its currency. */
                                 impact: number;
-                                /** @enum {string} */
-                                prompt: "speedfix" | "flow" | "grade" | "utm" | "speed" | "events" | "analytics";
+                                /**
+                                 * @description Which repo-ready prompt the dashboard's Copy prompt builds for the item.
+                                 * @enum {string}
+                                 */
+                                prompt: "speedfix" | "flow" | "grade" | "utm" | "utm_events" | "speed" | "events" | "analytics";
+                                /** @description The data the item's prompt uses. */
                                 context: {
+                                    /** @description The site's Vercel team. The public API leaves it out. */
+                                    teamSlug?: string | null;
+                                    /** @description The site's Scorecard row, for a grade item. */
                                     grade?: {
-                                        /** @enum {string} */
+                                        /**
+                                         * @description The grade, from A (best) to D.
+                                         * @enum {string}
+                                         */
                                         grade: "A" | "B" | "C" | "D";
+                                        /** @description What the grade is made of. */
                                         factors: {
-                                            /** @enum {string} */
-                                            key: "trend" | "pages" | "conv" | "speed" | "flow";
+                                            /**
+                                             * @description The factor: trend, pages (pages per visit), conv (conversion), speed (Core Web Vitals), flow (visitors sent onward) or paid (cost per conversion).
+                                             * @enum {string}
+                                             */
+                                            key: "trend" | "pages" | "conv" | "speed" | "flow" | "paid";
+                                            /** @description The factor's name as the dashboard shows it. */
                                             label: string;
+                                            /** @description The value as the dashboard shows it (for example +12% or 3.2%); — when not graded. */
                                             value: string;
-                                            /** @enum {string} */
+                                            /**
+                                             * @description good, ok or weak; na when the factor isn't graded.
+                                             * @enum {string}
+                                             */
                                             rating: "good" | "ok" | "weak" | "na";
+                                            /** @description What the value is measured against (for example vs previous week). */
                                             bench: string;
+                                            /** @description A short note on the value. */
                                             note: string;
+                                            /** @description 0–100: the length of the bar under the value. */
                                             bar: number;
                                         }[];
+                                        /** @description The p75 Core Web Vitals behind the speed factor; null without Speed Insights. */
                                         vitals: {
+                                            /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                             lcp: number | null;
+                                            /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                             inp: number | null;
+                                            /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                             cls: number | null;
                                         } | null;
                                     };
+                                    /** @description The values behind a speed item. */
                                     speed?: {
-                                        /** @enum {string} */
+                                        /**
+                                         * @description all, mobile or desktop.
+                                         * @enum {string}
+                                         */
                                         device: "all" | "mobile" | "desktop";
+                                        /** @description Core Web Vitals at p75. */
                                         values: {
+                                            /** @description Largest Contentful Paint at p75, in milliseconds; null without samples. */
                                             lcp: number | null;
+                                            /** @description Interaction to Next Paint at p75, in milliseconds; null without samples. */
                                             inp: number | null;
+                                            /** @description Cumulative Layout Shift at p75 (no unit); null without samples. */
                                             cls: number | null;
                                         };
                                     };
+                                    /** @description The board's main site, by domain. */
                                     mainSite?: string | null;
+                                    /** @description The campaign behind a spend item. */
+                                    spend?: {
+                                        /** @description The campaign (its utm_campaign value). */
+                                        campaign: string;
+                                        /** @description The campaign's spend in the range, in currency. */
+                                        amount: number;
+                                        /**
+                                         * @description ILS, USD, EUR or GBP.
+                                         * @enum {string}
+                                         */
+                                        currency: "USD" | "EUR" | "GBP" | "ILS";
+                                        /** @description The campaign's cost per goal conversion, in currency. */
+                                        costPerConversion: number;
+                                        /** @description The median cost per conversion of the board's campaigns in the same currency. */
+                                        median: number;
+                                    };
                                 };
-                                /** @enum {string} */
+                                /**
+                                 * @description open, snoozed or resolved.
+                                 * @enum {string}
+                                 */
                                 status: "open" | "snoozed" | "resolved";
+                                /** @description While snoozed: when the item comes back (epoch milliseconds); else null. */
                                 snoozedUntil: number | null;
+                                /** @description While resolved: when the item was resolved (epoch milliseconds); else null. */
                                 resolvedAt: number | null;
                             }[];
+                            /** @description Items per status, before the status filter. */
                             counts: {
+                                /** @description Open items. */
                                 open: number;
+                                /** @description Snoozed items. */
                                 snoozed: number;
+                                /** @description Resolved items. */
                                 resolved: number;
                             };
+                            /** @description Items resolved since the first of the month (UTC), on any board. */
                             resolvedThisMonth: number;
+                            /** @description Sites whose figures couldn't be read just now: their items may be missing. */
                             unavailable: string[];
                         };
                     };
@@ -1347,7 +1973,9 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
+                        /** @description The board whose Fix list holds the item. The note goes on the item's site there. */
                         boardId: string;
+                        /** @description The range the item was listed for. The default is 7d. */
                         range?: string;
                     };
                 };
@@ -1360,10 +1988,16 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The item's id, kind:domain. */
                             id: string;
-                            /** @enum {string} */
+                            /**
+                             * @description open, snoozed or resolved.
+                             * @enum {string}
+                             */
                             status: "open" | "snoozed" | "resolved";
+                            /** @description While snoozed: when the item comes back (epoch milliseconds); else null. */
                             snoozedUntil: number | null;
+                            /** @description While resolved: when the item was resolved (epoch milliseconds); else null. */
                             resolvedAt: number | null;
                         };
                     };
@@ -1432,10 +2066,16 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The item's id, kind:domain. */
                             id: string;
-                            /** @enum {string} */
+                            /**
+                             * @description open, snoozed or resolved.
+                             * @enum {string}
+                             */
                             status: "open" | "snoozed" | "resolved";
+                            /** @description While snoozed: when the item comes back (epoch milliseconds); else null. */
                             snoozedUntil: number | null;
+                            /** @description While resolved: when the item was resolved (epoch milliseconds); else null. */
                             resolvedAt: number | null;
                         };
                     };
@@ -1504,10 +2144,16 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The item's id, kind:domain. */
                             id: string;
-                            /** @enum {string} */
+                            /**
+                             * @description open, snoozed or resolved.
+                             * @enum {string}
+                             */
                             status: "open" | "snoozed" | "resolved";
+                            /** @description While snoozed: when the item comes back (epoch milliseconds); else null. */
                             snoozedUntil: number | null;
+                            /** @description While resolved: when the item was resolved (epoch milliseconds); else null. */
                             resolvedAt: number | null;
                         };
                     };
@@ -1571,26 +2217,50 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description The workspace's alert rules. */
                             alerts: {
-                                /** Format: uuid */
+                                /**
+                                 * Format: uuid
+                                 * @description The alert rule's id.
+                                 */
                                 id: string;
+                                /** @description The board the rule watches. */
                                 board: {
-                                    /** Format: uuid */
+                                    /**
+                                     * Format: uuid
+                                     * @description The board's id.
+                                     */
                                     id: string;
+                                    /** @description The board's name. */
                                     name: string;
                                 };
+                                /** @description visitors, pageviews or pages_per_visit. */
                                 metric: string;
-                                /** @enum {string} */
+                                /**
+                                 * @description drop or rise.
+                                 * @enum {string}
+                                 */
                                 direction: "drop" | "rise";
+                                /** @description The change, in percent, that fires the alert. */
                                 threshold: number;
+                                /** @description Whether the rule is on. */
                                 enabled: boolean;
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description When the rule last fired (ISO 8601); null when it never has.
+                                 */
                                 lastFiredAt: string | null;
                             }[];
+                            /** @description What fired in the last 30 days, newest first. */
                             recent: {
-                                /** Format: date-time */
+                                /**
+                                 * Format: date-time
+                                 * @description When it fired (ISO 8601).
+                                 */
                                 at: string;
+                                /** @description What the alert said. */
                                 text: string;
+                                /** @description The board's name; null when the board is gone. */
                                 board: string | null;
                             }[];
                         };
@@ -1614,6 +2284,120 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description A question about the workspace's sites, in plain words */
+                        question: string;
+                        /**
+                         * @description workspace: every board, sites counted once; board: one board (needs board)
+                         * @default workspace
+                         * @enum {string}
+                         */
+                        scope?: "board" | "workspace";
+                        /** @description For scope board: the board's id or exact name */
+                        board?: string;
+                        /**
+                         * @description The period of the figures: 24h, 7d, 30d or two dates (YYYY-MM-DD..YYYY-MM-DD).
+                         * @default 7d
+                         */
+                        range?: ("24h" | "7d" | "30d") | string;
+                    };
+                };
+            };
+            responses: {
+                /** @description One sentence with the key number, up to three points, the site to open and, comparing several, a small chart. Answered only from the workspace's figures */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description One sentence answering the question, the key number in **bold** (Markdown). */
+                            answer: string;
+                            /** @description Visitors per hour or day, oldest first. */
+                            points: string[];
+                            /** @description The site. */
+                            site: {
+                                /** @description The site's Vercel project id. */
+                                id: string;
+                                /** @description The site's production domain. */
+                                domain: string;
+                            } | null;
+                            /** @description A few words for a link to `site`, e.g. "Open the site"; null without a site. */
+                            action: string | null;
+                            /** @description A small bar list, only when the answer compares several sites or boards; null otherwise. */
+                            chart: {
+                                /** @description What to fix. */
+                                title: string;
+                                /** @description One row per graded landing page, best first. */
+                                rows: {
+                                    /** @description The factor's name as the dashboard shows it. */
+                                    label: string;
+                                    /** @description The value as the dashboard shows it (for example +12% or 3.2%); — when not graded. */
+                                    value: number;
+                                    /**
+                                     * @description What `value` counts: % (change against the previous period) or visitors.
+                                     * @enum {string}
+                                     */
+                                    unit: "%" | "visitors";
+                                    /** @description The site the note is for; null when it is for every site on the board. */
+                                    siteId: string | null;
+                                }[];
+                            } | null;
+                            /**
+                             * @description The utm_source value. In platform mode, the referrer host.
+                             * @enum {string}
+                             */
+                            source: "model" | "facts";
+                        };
+                    };
+                };
+                /** @description Missing, invalid or revoked API key */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description No such board */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Over 600 requests an hour per key; see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;

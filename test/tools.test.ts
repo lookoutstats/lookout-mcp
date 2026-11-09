@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { BOARD, boardSites, boards, connect, series } from "./helpers.js";
 
 describe("tools (one per tool, over a mocked Lookout API)", () => {
-  it("lists exactly the ten tools of §5ac, with read-only hints on reads and none on writes", async () => {
+  it("lists exactly the tools of §5ac and ask_lookout (§5av), with read-only hints on reads and none on writes", async () => {
     const { client } = await connect({});
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
-      ["add_annotation", "compare_sites", "export_board", "get_board", "get_campaigns", "get_flow", "get_site", "get_speed", "list_alerts", "list_boards", "list_fixes"].sort(),
+      ["add_annotation", "ask_lookout", "compare_sites", "export_board", "get_board", "get_campaigns", "get_flow", "get_site", "get_speed", "list_alerts", "list_boards", "list_fixes"].sort(),
     );
     for (const t of tools) {
       expect(t.description!.length).toBeGreaterThan(40);
@@ -185,4 +185,24 @@ describe("tools (one per tool, over a mocked Lookout API)", () => {
     const range = await tool("get_board", { board: BOARD, range: { from: "2026-09-01", to: "2026-10-15" } });
     expect([range.isError, range.text]).toEqual([true, "Invalid range: A custom range is at most 30 days; 2026-09-01..2026-10-15 is 45"]);
   });
+
+  it("ask_lookout: the question, scope, board and range to POST /ask; the answer and points as the text, the chart in the JSON", async () => {
+    const reply = {
+      answer: "**lp.example** lost the most: **−50.0%** to 60 visitors.",
+      points: ["Top source there: google.com"],
+      site: { id: "prj_lp", domain: "lp.example" },
+      action: "Open the site",
+      chart: { title: "Biggest drops", rows: [{ label: "lp.example", value: -50, unit: "%", siteId: "prj_lp" }, { label: "blog.example", value: -25, unit: "%", siteId: "prj_blog" }] },
+      source: "model",
+    };
+    const { tool, calls } = await connect({ "POST /ask": () => reply });
+    const r = await tool("ask_lookout", { question: "Which site lost the most traffic this week and why?" });
+    expect(r.summary).toBe("lp.example lost the most: −50.0% to 60 visitors.");
+    expect(r.text).toContain("- Top source there: google.com");
+    expect(r.data).toMatchObject({ chart: { title: "Biggest drops" } });
+    expect(calls.at(-1)).toMatchObject({ method: "POST", path: "/ask", body: { question: "Which site lost the most traffic this week and why?", scope: "workspace", range: "7d" } });
+    await tool("ask_lookout", { question: "What dropped?", scope: "board", board: "Clients", range: "30d" });
+    expect(calls.at(-1)!.body).toEqual({ question: "What dropped?", scope: "board", board: "Clients", range: "30d" });
+  });
 });
+

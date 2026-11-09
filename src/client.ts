@@ -29,6 +29,8 @@ export type SiteDeployments = Answer<"/v1/sites/{id}/deployments", "get", 200>;
 export type SiteSpeed = Answer<"/v1/sites/{id}/speed", "get", 200>;
 export type SiteCampaigns = Answer<"/v1/sites/{id}/campaigns", "get", 200>;
 export type Alerts = Answer<"/v1/alerts", "get", 200>;
+export type AskAnswer = Answer<"/v1/ask", "post", 200>;
+export type AskInput = Body<"/v1/ask">;
 export type Device = "all" | "mobile" | "desktop";
 
 /** An error answer from the API: its HTTP status, error code and message, and for a 429 when to retry. */
@@ -135,5 +137,6 @@ export function createClient(opts: ClientOptions) {
     siteSpeed: (site: string, range: string, device: Device) => request<SiteSpeed>("GET", `/sites/${enc(site)}/speed`, { range, device }),
     siteCampaigns: (site: string, range: string) => request<SiteCampaigns>("GET", `/sites/${enc(site)}/campaigns`, { range }),
     alerts: () => request<Alerts>("GET", "/alerts"),
+    ask: (input: AskInput) => request<AskAnswer>("POST", "/ask", undefined, input),
   };
 }
