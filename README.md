@@ -110,6 +110,7 @@ These rules apply to all tools:
 | `get_speed` | `site`, `range`, `device` | Core Web Vitals (LCP, INP, CLS, p75) for all, mobile or desktop visitors, and the slowest routes |
 | `list_fixes` | `board`, `range`, `status` | The board's Fix list: what to fix first, ranked by visitors affected, with why it matters and how to check the fix |
 | `list_alerts` | — | The alert rules, and the alerts of the last 30 days |
+| `ask_lookout` | `question`, `scope` (`workspace` or `board`), `board?`, `range` | One plain answer from Lookout's own figures: a sentence with the key number, up to three points, the most relevant site and, when it compares several sites or boards, a small chart. `workspace` reads every board. |
 | `add_annotation` ✎ | `board`, `site?`, `date`, `text`, `scope` | Adds a note to a day on the board's charts, for one site or for all sites |
 | `export_board` ✎ | `board`, `fmt` (`pdf` or `csv`), `range` | A download link for the board. The link is valid for 5 minutes. |
 
