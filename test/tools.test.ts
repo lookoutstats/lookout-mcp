@@ -183,7 +183,7 @@ describe("tools (one per tool, over a mocked Lookout API)", () => {
     expect((await tool("list_alerts")).text).toBe("Rate limited: 600 requests an hour per key. Try again in 120s.");
     expect((await tool("get_speed", { site: "prj_zzz" })).text).toContain("Not found");
     const range = await tool("get_board", { board: BOARD, range: { from: "2026-09-01", to: "2026-10-15" } });
-    expect([range.isError, range.text]).toEqual([true, "Invalid range: A custom range is at most 30 days; 2026-09-01..2026-10-15 is 45"]);
+    expect([range.isError, range.text]).toEqual([true, "Invalid range: A custom range is at most 31 days; 2026-09-01..2026-10-15 is 45"]);
   });
 
   it("ask_lookout: the question, scope, board and range to POST /ask; the answer and points as the text, the chart in the JSON", async () => {
