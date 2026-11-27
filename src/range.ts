@@ -7,13 +7,13 @@ export type Preset = (typeof PRESETS)[number];
 const day = z.iso.date().describe("A UTC day, YYYY-MM-DD");
 
 /**
- * A tool's `range`: a preset (24h, 7d, 30d) or a custom window of whole UTC days, `{ from, to }`, 1 to 30 days long and
+ * A tool's `range`: a preset (24h, 7d, 30d) or a custom window of whole UTC days, `{ from, to }`, 1 to 31 days long and
  * ending today at the latest. The API takes the custom form as `YYYY-MM-DD..YYYY-MM-DD`.
  */
 export const RangeSchema = z
-  .union([z.enum(PRESETS), z.object({ from: day, to: day }).describe("A custom window of whole UTC days, 1 to 30 days, ending today at the latest")])
+  .union([z.enum(PRESETS), z.object({ from: day, to: day }).describe("A custom window of whole UTC days, 1 to 31 days, ending today at the latest")])
   .default("7d")
-  .describe('24h, 7d or 30d, or a custom window { "from": "YYYY-MM-DD", "to": "YYYY-MM-DD" } (UTC days, up to 30). Default 7d.');
+  .describe('24h, 7d or 30d, or a custom window { "from": "YYYY-MM-DD", "to": "YYYY-MM-DD" } (UTC days, up to 31). Default 7d.');
 export type Range = z.infer<typeof RangeSchema>;
 
 const DAY_MS = 86_400_000;
@@ -27,7 +27,7 @@ export function toRangeKey(range: Range, now: Date = new Date()): string {
   if (from > to) throw new RangeError(`range.from (${range.from}) is after range.to (${range.to})`);
   if (to > today) throw new RangeError(`range.to (${range.to}) is in the future`);
   const days = (to - from) / DAY_MS + 1;
-  if (days > 30) throw new RangeError(`A custom range is at most 30 days; ${range.from}..${range.to} is ${days}`);
+  if (days > 31) throw new RangeError(`A custom range is at most 31 days; ${range.from}..${range.to} is ${days}`);
   return `${range.from}..${range.to}`;
 }
 

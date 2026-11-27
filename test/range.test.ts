@@ -15,7 +15,9 @@ describe("range", () => {
     expect(toRangeKey({ from: "2026-10-01", to: "2026-10-21" }, NOW)).toBe("2026-10-01..2026-10-21");
     expect(() => toRangeKey({ from: "2026-10-10", to: "2026-10-01" }, NOW)).toThrow(/after/);
     expect(() => toRangeKey({ from: "2026-10-20", to: "2026-10-22" }, NOW)).toThrow(/future/);
-    expect(() => toRangeKey({ from: "2026-09-01", to: "2026-10-21" }, NOW)).toThrow(/at most 30 days/);
+    expect(() => toRangeKey({ from: "2026-09-01", to: "2026-10-21" }, NOW)).toThrow(/at most 31 days/);
+    // A whole 31-day month fits (Lookout's cap since 2026-11-27).
+    expect(toRangeKey({ from: "2026-08-01", to: "2026-08-31" }, NOW)).toBe("2026-08-01..2026-08-31");
     expect(RangeSchema.safeParse({ from: "Oct 1", to: "2026-10-02" }).success).toBe(false);
     expect(RangeSchema.safeParse("1y").success).toBe(false);
   });
